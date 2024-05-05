@@ -49,4 +49,19 @@ public class Mapper {
         deleteTaskResponse.setMessage("Task deleted successfully");
         return deleteTaskResponse;
     }
+
+    public static LoginResponse mapLoginResponse(User existingUser){
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setLoginStatus(existingUser.isLogIn());
+        loginResponse.setMessage("User logged in successfully");
+        return loginResponse;
+    }
+
+    public static LogOutResponse mapLogOutResponse(User existingUser){
+        LogOutResponse logOutResponse = new LogOutResponse();
+        logOutResponse.setMessage("User logged out successfully");
+        logOutResponse.setLogOutStatus(existingUser.isLogIn());
+        return logOutResponse;
+
+    }
 }

@@ -14,6 +14,7 @@ public class User {
     private LocalDate dateOFBirth;
     private String email;
     private String phoneNumber;
+    private boolean isLogIn;
     private Address userAddress;
     private List<Task> allTasks = new ArrayList<>();
     private List<Task> completedTasks = new ArrayList<>();

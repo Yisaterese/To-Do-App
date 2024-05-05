@@ -1,9 +1,7 @@
 package com.example.todo_app.controller;
 
 import com.example.todo_app.data.model.Task;
-import com.example.todo_app.dto.request.CreateTaskRequest;
-import com.example.todo_app.dto.request.DeleteTaskRequest;
-import com.example.todo_app.dto.request.RegisterUserRequest;
+import com.example.todo_app.dto.request.*;
 import com.example.todo_app.dto.response.*;
 import com.example.todo_app.exception.ToDoRunTimeException;
 import com.example.todo_app.service.UserService;
@@ -28,6 +26,16 @@ public class UserController {
             return new ResponseEntity<>(new ApiResponse(false,exception.getMessage()),HttpStatus.BAD_REQUEST);
         }
     }
+@PostMapping("/login_user")
+public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
+        try{
+            LoginResponse response = userService.login(loginRequest);
+            return  new ResponseEntity<>(new ApiResponse(true, response),HttpStatus.OK);
+        }catch (ToDoRunTimeException exception){
+            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()),HttpStatus.BAD_REQUEST);
+        }
+}
+
 
     @PostMapping("/createTask")
     public ResponseEntity<?> createTask(CreateTaskRequest createTaskRequest){
@@ -65,6 +73,16 @@ public class UserController {
             return new ResponseEntity<>(new ApiResponse(true, response), HttpStatus.OK);
         } catch (ToDoRunTimeException exception) {
             return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/logOut_user")
+    public ResponseEntity<?> logOut(@RequestBody LogOutRequest logOutRequest){
+        try{
+            LogOutResponse response = userService.logOut(logOutRequest);
+            return  new ResponseEntity<>(new ApiResponse(true, response),HttpStatus.OK);
+        }catch (ToDoRunTimeException exception){
+            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()),HttpStatus.BAD_REQUEST);
         }
     }
 }

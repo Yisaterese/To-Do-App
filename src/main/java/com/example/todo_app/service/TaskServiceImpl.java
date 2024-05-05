@@ -63,7 +63,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public DeleteTaskResponse deleteTaskByTaskId(DeleteTaskRequest upDateTaskRequest){
-        Optional<Task> foundTask = taskRepository.findById(upDateTaskRequest.getTId());
+        Optional<Task> foundTask = taskRepository.findById(upDateTaskRequest.getTId().strip());
         if (foundTask.isEmpty())throw new TaskNotFoundException("Task not found");
         taskRepository.delete(foundTask.get());
         return mapDeleteTaskResponse();

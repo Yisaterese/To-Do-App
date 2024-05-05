@@ -1,13 +1,8 @@
 package com.example.todo_app.service;
 
 import com.example.todo_app.data.model.Task;
-import com.example.todo_app.dto.request.CreateTaskRequest;
-import com.example.todo_app.dto.request.DeleteTaskRequest;
-import com.example.todo_app.dto.request.RegisterUserRequest;
-import com.example.todo_app.dto.response.CreateTaskResponse;
-import com.example.todo_app.dto.response.DeleteTaskResponse;
-import com.example.todo_app.dto.response.RegisterUserResponse;
-import com.example.todo_app.dto.response.DeleteAllTaskResponse;
+import com.example.todo_app.dto.request.*;
+import com.example.todo_app.dto.response.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,4 +18,8 @@ public interface UserService {
     DeleteAllTaskResponse deleteAllTasks();
 
     DeleteTaskResponse deleteTaskByTId(DeleteTaskRequest deleteTaskRequest);
+
+    LoginResponse login(LoginRequest loginRequest);
+
+    LogOutResponse logOut(LogOutRequest logOutRequest);
 }

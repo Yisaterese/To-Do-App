@@ -3,7 +3,7 @@ package com.example.todo_app.dto.response;
 import lombok.Data;
 
 @Data
-public class LoginResponse {
+public class LogOutResponse {
     private String message;
-    private boolean loginStatus;
+    private boolean logOutStatus;
 }
