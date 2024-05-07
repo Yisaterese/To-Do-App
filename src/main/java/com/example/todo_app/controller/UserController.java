@@ -1,6 +1,7 @@
 package com.example.todo_app.controller;
 
 import com.example.todo_app.data.model.Task;
+import com.example.todo_app.data.model.User;
 import com.example.todo_app.dto.request.*;
 import com.example.todo_app.dto.response.*;
 import com.example.todo_app.exception.ToDoRunTimeException;
@@ -38,7 +39,7 @@ public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
 
 
     @PostMapping("/createTask")
-    public ResponseEntity<?> createTask(CreateTaskRequest createTaskRequest){
+    public ResponseEntity<?> createTask(@RequestBody CreateTaskRequest createTaskRequest){
         try{
             CreateTaskResponse response = userService.createTask(createTaskRequest);
             return new ResponseEntity<>(new ApiResponse(true, response),HttpStatus.OK);
@@ -66,14 +67,64 @@ public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
         }
     }
 
-    @DeleteMapping("/deleteTaskByTId")
-    public ResponseEntity<?> deleteTaskByTId(DeleteTaskRequest deleteTaskRequest) {
+    @DeleteMapping("/deleteTaskByUserName")
+    public ResponseEntity<?> deleteTaskByUniqueNumber(@RequestBody DeleteTaskRequest deleteTaskRequest) {
         try {
-            DeleteTaskResponse response = userService.deleteTaskByTId(deleteTaskRequest);
+            DeleteTaskResponse response = userService.deleteTaskByUserName(deleteTaskRequest);
             return new ResponseEntity<>(new ApiResponse(true, response), HttpStatus.OK);
         } catch (ToDoRunTimeException exception) {
             return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()), HttpStatus.BAD_REQUEST);
         }
+    }
+    @PostMapping("/assignTask")
+    public ResponseEntity<?> assignTask(AssignTaskRequest assignTaskRequest){
+        try{
+            AssignTaskResponse response = userService.assignTask(assignTaskRequest);
+            return new ResponseEntity<>(new ApiResponse(true,response),HttpStatus.OK);
+        }catch (ToDoRunTimeException exception){
+            return new ResponseEntity<>(new ApiResponse(false,exception.getMessage()),HttpStatus.BAD_REQUEST);
+        }
+    }
+    @GetMapping("/getUser")
+    public ResponseEntity<?> getUser(@RequestBody GetUserRequest getUserRequest){
+        try{
+            User user = userService.getUserByEmail(getUserRequest);
+            return new ResponseEntity<>(new ApiResponse(true,user),HttpStatus.OK);
+            }catch (ToDoRunTimeException exception){
+            return new ResponseEntity<>(new ApiResponse(false,exception.getMessage()),HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/getUser_tasks")
+    public ResponseEntity<?> getUserTasks(@RequestBody GetAllTasksByUserRequest getUserRequest){
+        try{
+            List<Task> tasks = userService.getUserTasks(getUserRequest);
+            return new ResponseEntity<>(new ApiResponse(true,tasks),HttpStatus.OK);
+        }catch (ToDoRunTimeException exception){
+            return new ResponseEntity<>(new ApiResponse(false,exception.getMessage()),HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    @GetMapping("/getAllUsers")
+    public ResponseEntity<?> getAllUsers(){
+        try {
+            List<User> allUsers = userService.getAllUsers();
+            return  new ResponseEntity<>(new ApiResponse(true,allUsers),HttpStatus.OK);
+        }catch (ToDoRunTimeException exception){
+            return  new ResponseEntity<>( new ApiResponse(false, exception.getMessage()),HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping("/deleteAllUsers")
+    public ResponseEntity<?> deleteAllUsers(){
+        try {
+            DeleteAllUserResponse response = userService.deleteAllUsers();
+            return new ResponseEntity<>(new ApiResponse(true, response),HttpStatus.OK);
+        }catch (ToDoRunTimeException exception){
+            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()),HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     @PostMapping("/logOut_user")

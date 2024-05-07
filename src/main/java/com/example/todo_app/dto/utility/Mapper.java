@@ -22,13 +22,11 @@ public class Mapper {
         CreateTaskResponse response = new CreateTaskResponse();
         response.setTitle(task.getTitle());
         response.setDescription(task.getDescription());
-        response.setDueDate(task.getDueDate());
-        response.setDateCreated(task.getDateCreated());
+        //response.setDueDate(task.getDueDate());
+        //response.setDateCreated(task.getDateCreated());
         response.setTaskPriority(task.getTaskPriority());
-        response.setCreator(task.getCreator());
-        response.setAssignee(task.getAssignee());
-        response.setReminder(task.getReminder());
-        response.setEstimatedTime(task.getEstimatedTime());
+        //response.setCreator(task.getCreator());
+        //response.setEstimatedTime(task.getEstimatedTime());
         return response;
     }
 
@@ -62,6 +60,17 @@ public class Mapper {
         logOutResponse.setMessage("User logged out successfully");
         logOutResponse.setLogOutStatus(existingUser.isLogIn());
         return logOutResponse;
+    }
 
+    public static AssignTaskResponse mapAssignTaskResponse(User assigner,User assignee){
+        AssignTaskResponse assignTaskResponse = new AssignTaskResponse();
+        assignTaskResponse.setMessage(assigner.getUserName()+" has successfully assigned task to "+assignee.getUserName());
+        return assignTaskResponse;
+    }
+
+    public static DeleteAllUserResponse  mapDeleteAllUsersResponse(){
+        DeleteAllUserResponse deleteAlluserResponse = new DeleteAllUserResponse();
+        deleteAlluserResponse.setMessage("All users have been deleted successfully ");
+        return deleteAlluserResponse;
     }
 }

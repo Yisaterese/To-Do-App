@@ -1,7 +1,5 @@
 package com.example.todo_app.dto.request;
 
-import com.example.todo_app.data.model.User;
-import com.example.todo_app.dto.utility.TaskPriority;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -10,12 +8,12 @@ import java.time.LocalDate;
 public class UpDateTaskRequest {
     private String title;
     private String description;
-    private LocalDate dueDate;
-    private LocalDate DateCreated;
-    private TaskPriority taskPriority;
-    private User Creator;
+    private String dueDate;
+    private LocalDate dateCreated;
+    private String taskPriority;
+    private String creator;
     private String reminder;
-    private LocalDate estimatedTime;
-    private Object assignee;
+    private String estimatedTime;
+    private String assignee;
     private String TId;
 }

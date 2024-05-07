@@ -1,20 +1,17 @@
 package com.example.todo_app.data.model;
 
-import com.example.todo_app.dto.utility.TaskPriority;
 import lombok.Data;
 
-import java.time.LocalDate;
 
 @Data
 public class Task {
     private String title;
     private String description;
-    private LocalDate dueDate;
-    private LocalDate DateCreated;
     private String taskPriority;
-    private User Creator;
-    private String reminder;
-    private LocalDate estimatedTime;
-    private Object assignee;
-    private String TId;
+    private String userName;
+    private String taskUniqueNumber;
+    //private String dueDate;
+    //private LocalDate dateCreated;
+    //private String estimatedTime;
+
 }
