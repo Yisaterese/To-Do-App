@@ -12,10 +12,10 @@ import java.util.List;
 @Data
 @Document
 public class User {
+    private String id;
     private String userName;
     private String password;
     private LocalDate dateOFBirth;
-    @Id
     private String email;
     private String phoneNumber;
     private boolean isLogIn;

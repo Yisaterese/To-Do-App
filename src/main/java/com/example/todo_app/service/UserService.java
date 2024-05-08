@@ -34,4 +34,11 @@ public interface UserService {
 
     DeleteAllUserResponse deleteAllUsers();
 
+    User findUserByUserName(String userName);
+
+    DeleteUserResponse deleteUserByUserName(DeleteUserRequest deleteUserRequest);
+
+    UpdateUserResponse updateUser(UpdateUserRequest updateUserRequest);
+
+    Task findTaskByTitle(CreateTaskRequest createTaskRequest);
 }

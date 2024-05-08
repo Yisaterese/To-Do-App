@@ -8,8 +8,7 @@ import java.util.List;
 
 @Repository
 public interface TaskRepository extends MongoRepository<Task,String > {
-    Task findTaskByUserName(String uniqueNumber
-    );
+    Task findTaskByUserName(String uniqueNumber);
 
     Task findByUserName(String userName);
 

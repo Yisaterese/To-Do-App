@@ -6,7 +6,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class RegisterUserResponse {
+public class    UpdateUserResponse {
     private String userName;
     private LocalDate dateOFBirth;
     private String email;

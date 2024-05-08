@@ -78,9 +78,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private List<Task> getAllTasks() {
-        List<Task> tasks = taskRepository.findAll();
         //if(tasks.isEmpty())throw new NotTaskFoundException("Your list of tasks is empty");
-        return tasks;
+        return taskRepository.findAll();
     }
 
 
@@ -106,6 +105,13 @@ public class TaskServiceImpl implements TaskService {
         List<Task> foundTasks = taskRepository.findAllTasksByUserName(getUserRequest.getUserName());
         if (foundTasks.isEmpty())throw new NotTaskFoundException("No task found");
         return foundTasks;
+    }
+
+    @Override
+    public Task findTaskByUser(String userName) {
+        Task foundTask = taskRepository.findTaskByUserName(userName);
+        if(foundTask == null)throw new TaskNotFoundException("Task not found");
+        return foundTask;
     }
 
 

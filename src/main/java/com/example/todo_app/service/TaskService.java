@@ -13,13 +13,9 @@ import java.util.List;
 @Service
 public interface TaskService {
   Task createTask(CreateTaskRequest createTaskRequest);
-
-  //  Task createTasks(CreateTaskRequest createTaskRequest);
-    //CreateTaskResponse createTask(CreateTaskRequest createTaskRequest);
     List<Task> findAllTasks();
     DeleteAllTaskResponse deleteAllTasks();
     DeleteTaskResponse deleteTaskByUserName(DeleteTaskRequest deleteTaskRequest);
-
-
   List<Task> findAllTaskByUser(GetAllTasksByUserRequest getUserRequest);
+  Task findTaskByUser(String userName);
 }

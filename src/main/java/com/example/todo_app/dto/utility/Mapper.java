@@ -10,7 +10,6 @@ public class Mapper {
     public static RegisterUserResponse mapRegisterResponse(User user){
         RegisterUserResponse registerUserResponse = new RegisterUserResponse();
         registerUserResponse.setUserName(user.getUserName());
-        registerUserResponse.setPassword(user.getPassword());
         registerUserResponse.setEmail(user.getEmail());
         registerUserResponse.setDateOFBirth(LocalDate.now());
         registerUserResponse.setPhoneNumber(user.getPhoneNumber());
@@ -22,18 +21,30 @@ public class Mapper {
         CreateTaskResponse response = new CreateTaskResponse();
         response.setTitle(task.getTitle());
         response.setDescription(task.getDescription());
-        //response.setDueDate(task.getDueDate());
-        //response.setDateCreated(task.getDateCreated());
         response.setTaskPriority(task.getTaskPriority());
-        //response.setCreator(task.getCreator());
-        //response.setEstimatedTime(task.getEstimatedTime());
         return response;
+    }
+
+    public static DeleteUserResponse mapDeleteUserResponse(){
+        DeleteUserResponse deleteUserResponse = new DeleteUserResponse();
+        deleteUserResponse.setMessage("User deleted successfully");
+        return deleteUserResponse;
     }
 
     public static DeleteAllTaskResponse mapDeleteTasksResponse(){
         DeleteAllTaskResponse response = new DeleteAllTaskResponse();
         response.setMessage("Tasks deleted successfully");
         return response;
+    }
+
+    public static UpdateUserResponse mapUpdateUserResponse(User user){
+       UpdateUserResponse updateUserResponse = new UpdateUserResponse();
+       updateUserResponse.setUserName(user.getUserName());
+       updateUserResponse.setPhoneNumber(user.getPhoneNumber());
+       updateUserResponse.setEmail(user.getEmail());
+       updateUserResponse.setUserAddress(user.getUserAddress());
+       updateUserResponse.setDateOFBirth(user.getDateOFBirth());
+       return updateUserResponse;
     }
 
     public static UpDateTaskResponse mapUDateTaskResponse(){

@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class AssignTaskRequest {
-    private String assigneeEmail;
-    private String assignerEmail;
-    private String taskToBeAssigned;
+    private String assigneeUserName;
+    private String assignerUserName;
+    private String title;
 }
