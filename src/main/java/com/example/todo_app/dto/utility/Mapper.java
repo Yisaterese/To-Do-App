@@ -61,7 +61,7 @@ public class Mapper {
 
     public static LoginResponse mapLoginResponse(User existingUser){
         LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setLoginStatus(existingUser.isLogIn());
+        loginResponse.setLoginStatus(existingUser.isLoggedIn());
         loginResponse.setMessage("User logged in successfully");
         return loginResponse;
     }
@@ -69,7 +69,7 @@ public class Mapper {
     public static LogOutResponse mapLogOutResponse(User existingUser){
         LogOutResponse logOutResponse = new LogOutResponse();
         logOutResponse.setMessage("User logged out successfully");
-        logOutResponse.setLogOutStatus(existingUser.isLogIn());
+        logOutResponse.setLogOutStatus(existingUser.isLoggedIn());
         return logOutResponse;
     }
 

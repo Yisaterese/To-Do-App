@@ -37,7 +37,6 @@ public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
         }
 }
 
-
     @PostMapping("/createTask")
     public ResponseEntity<?> createTask(@RequestBody CreateTaskRequest createTaskRequest){
         try{

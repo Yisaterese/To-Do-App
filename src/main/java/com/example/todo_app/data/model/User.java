@@ -2,7 +2,6 @@ package com.example.todo_app.data.model;
 
 import com.example.todo_app.dto.utility.Address;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
@@ -18,7 +17,7 @@ public class User {
     private LocalDate dateOFBirth;
     private String email;
     private String phoneNumber;
-    private boolean isLogIn;
+    private boolean isLoggedIn;
     private Address userAddress;
     private List<Task> allTasks = new ArrayList<>();
     private List<Task> completedTasks = new ArrayList<>();

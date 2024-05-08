@@ -9,7 +9,6 @@ import com.example.todo_app.dto.utility.EmailValidator;
 import com.example.todo_app.dto.utility.PasswordEncryptor;
 import com.example.todo_app.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -33,7 +32,7 @@ public class UserServiceImpl implements UserService{
     }
     @Override
     public LoginResponse login(LoginRequest loginRequest){
-        User existingUser = userRepository.findByUserName(loginRequest.getUserName());
+        User existingUser = userRepository.findUserByUserName(loginRequest.getUserName());
         //validateUserByEmail(loginRequest, existingUser);
         validateIfIsNull(existingUser);
         validateAlreadyLoggedIn(existingUser);
@@ -58,10 +57,10 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public CreateTaskResponse createTask(CreateTaskRequest createTaskRequest) {
-        User foundUser = userRepository.findByUserName(createTaskRequest.getUserName());
+        User foundUser = userRepository.findUserByUserName(createTaskRequest.getUserName());
         if (foundUser == null) throw new UserNotFoundException("User not found");
         foundUser.getAllTasks().forEach(task -> {if(task.getTitle().equals(createTaskRequest.getTitle()))throw new AlreadyExistingTaskException("Task with "+createTaskRequest.getTitle()+" already created");});
-        if(!foundUser.isLogIn())throw new UserNotLoggedInException("User not logged in");
+        if(!foundUser.isLoggedIn())throw new UserNotLoggedInException("User not logged in");
         Task createdTask = taskService.createTask(createTaskRequest);
         List<Task> tasks = foundUser.getAllTasks();
         tasks.add(createdTask);
@@ -85,7 +84,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public List<Task> getUserTasks(GetAllTasksByUserRequest getUserRequest) {
-        User foundUser = userRepository.findByUserName(getUserRequest.getUserName());
+        User foundUser = userRepository.findUserByUserName(getUserRequest.getUserName());
         List<Task>  tasks = foundUser.getAllTasks();
         if (tasks.isEmpty())throw new TaskNotFoundException("No task found");
         return  tasks;//taskService.findAllTaskByUser(getUserRequest);
@@ -99,12 +98,12 @@ public class UserServiceImpl implements UserService{
     private  void setUserProperties(LoginRequest loginRequest, User existingUser) {
         PasswordEncryptor.encodePassword(loginRequest.getPassword(),existingUser.getPassword());
         if (!existingUser.getUserName().equals(loginRequest.getUserName()))throw new InvalidLoginRequest("Invalid login request username");
-        existingUser.setLogIn(true);
+        existingUser.setLoggedIn(true);
 
     }
 
     private static void validateAlreadyLoggedIn(User existingUser) {
-        if(existingUser.isLogIn())throw new UserAlreadyLoggedException("User already logged in ");
+        if(existingUser.isLoggedIn())throw new UserAlreadyLoggedException("User already logged in ");
     }
 
     private static void validateUserByEmail(LoginRequest loginRequest, User existingUser) {
@@ -117,22 +116,22 @@ public class UserServiceImpl implements UserService{
 
    @Override
     public LogOutResponse logOut(LogOutRequest logOutRequest){
-        User existingUser = userRepository.findByUserName(logOutRequest.getUserName());
+        User existingUser = userRepository.findUserByUserName(logOutRequest.getUserName());
         validateUser(logOutRequest, existingUser);
         validateIfIsNull(existingUser);
         validateAlreadyLoggedOut(existingUser);
-        existingUser.setLogIn(false);
+        existingUser.setLoggedIn(false);
         userRepository.save(existingUser);
         return mapLogOutResponse(existingUser);
 
     }
 
     private void validateAlreadyLoggedOut(User existingUser) {
-        if(!existingUser.isLogIn())throw new UserAlreadyLoggedOutException("User already logged out ");
+        if(!existingUser.isLoggedIn())throw new UserAlreadyLoggedOutException("User already logged out ");
     }
 
     private User getUserByEmail(LogOutRequest logOutRequest) {
-        return userRepository.findByUserName(logOutRequest.getUserName());
+        return userRepository.findUserByUserName(logOutRequest.getUserName());
     }
 
     private static void validateUser(LogOutRequest logOutRequest, User existingUser) {
@@ -141,12 +140,22 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public AssignTaskResponse assignTask(AssignTaskRequest assignTaskRequest){
-        User assignee = userRepository.findByUserName(assignTaskRequest.getAssigneeUserName());
-        User assigner = userRepository.findByUserName(assignTaskRequest.getAssignerUserName());
-        if(!assigner.isLogIn())throw new UserNotLoggedInException("User not logged in");
-        Task assignerTask_toBeAssigned = assigner.getAllTasks().stream().filter(task -> task.getTitle().equals(assignTaskRequest.getTitle())).findFirst().orElseThrow(() -> new TaskNotFoundException("Task not found"));
-        assignee.getAllTasks().add(assignerTask_toBeAssigned);
-        assigner.getAllTasks().remove(assignerTask_toBeAssigned);
+        User assignee = findUserByUserName(assignTaskRequest.getAssigneeUserName());
+        User assigner = findUserByUserName(assignTaskRequest.getAssignerUserName());
+        validateIfIsNull(assignee);
+        validateIfIsNull(assigner);
+        if(!assigner.isLoggedIn())throw new UserNotLoggedInException("User not logged in");
+        Task assignerTask_toBeAssigned = assigner.getAllTasks().stream().filter(task ->
+                task.getTitle().equals(assignTaskRequest.getTitle())).findFirst().orElseThrow(() -> new TaskNotFoundException("Task not found"));
+
+        List<Task> assigneeTasks = assignee.getAllTasks();
+        assigneeTasks.add(assignerTask_toBeAssigned);
+        assignee.setAllTasks(assigneeTasks);
+        userRepository.save(assignee);
+        List<Task> assignerTasks = assigner.getAllTasks();
+        assignerTasks.remove(assignerTask_toBeAssigned);
+        userRepository.save(assigner);
+
         return mapAssignTaskResponse(assigner, assignee);
     }
 
@@ -176,7 +185,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User  findUserByUserName(String userName) {
-        User foundUser = userRepository.findByUserName(userName);
+        User foundUser = userRepository.findUserByUserName(userName);
         if(foundUser == null)throw new UserNotFoundException("User not found");
         return foundUser;
     }
@@ -191,7 +200,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public UpdateUserResponse updateUser(UpdateUserRequest updateUserRequest) {
         User foundUser = findUserByUserName(updateUserRequest.getUserName());
-        if(!foundUser.isLogIn())throw new UserNotLoggedInException("User not logged in");
+        if(!foundUser.isLoggedIn())throw new UserNotLoggedInException("User not logged in");
         foundUser.setUserName(updateUserRequest.getUserName());
         foundUser.setPassword(updateUserRequest.getPassword());
         foundUser.setEmail(updateUserRequest.getEmail());
