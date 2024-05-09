@@ -8,11 +8,14 @@ import com.example.todo_app.dto.request.DeleteTaskRequest;
 import com.example.todo_app.dto.request.GetAllTasksByUserRequest;
 import com.example.todo_app.dto.response.DeleteAllTaskResponse;
 import com.example.todo_app.dto.response.DeleteTaskResponse;
+import com.example.todo_app.exception.InvalidDateException;
 import com.example.todo_app.exception.NotTaskFoundException;
 import com.example.todo_app.exception.TaskNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,12 +56,10 @@ public class TaskServiceImpl implements TaskService {
 //        newTask.setTaskUniqueNumber(createTaskRequest.getTaskUniqueNumber());
 //    }
 
-//    public static String formatDate(String createTaskRequest){
-//        if(createTaskRequest == null)throw  new InvalidDateException("Invalid date provided");
-//        LocalDate parseDate = LocalDate.parse(createTaskRequest);
-//        DateTimeFormatter formattedDate = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
-//        return parseDate.format(formattedDate);
-//    }
+    public static LocalDate formatDate(String createTaskRequest){
+        if(createTaskRequest == null)throw  new InvalidDateException("Invalid date provided");
+        return LocalDate.parse(createTaskRequest);
+    }
 
     @Override
     public Task createTask(CreateTaskRequest createTaskRequest) {
@@ -71,6 +72,7 @@ public class TaskServiceImpl implements TaskService {
         taskRepository.save(newTask);
         return newTask;
     }
+
 
     @Override
     public List<Task> findAllTasks(){

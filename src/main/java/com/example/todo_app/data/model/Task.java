@@ -4,6 +4,8 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
+
 
 @Data
 @Document
@@ -15,9 +17,9 @@ public class Task {
     private String taskPriority;
     private String userName;
     private String taskUniqueNumber;
-    //private String dueDate;
-    //private LocalDate dateCreated;
-    //private String estimatedTime;
+//    private LocalDate dueDate;
+//    private LocalDate dateCreated;
+
 
 }
 

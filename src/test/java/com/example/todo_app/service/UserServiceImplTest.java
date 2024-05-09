@@ -344,7 +344,6 @@ public class UserServiceImplTest {
         CreateTaskResponse createTaskResponse = userService.createTask(createTaskRequest);
         Assertions.assertNotNull(createTaskResponse);
         User foundUserWithTask = userService.findUserByUserName(createTaskRequest.getUserName());
-//        System.out.println(foundUserWithTask);
         Assertions.assertEquals(1,foundUserWithTask.getAllTasks().size());
 
 
@@ -360,11 +359,60 @@ public class UserServiceImplTest {
         AssignTaskResponse assignTaskResponse = userService.assignTask(assignTaskRequest);
         User assigner = userService.findUserByUserName(foundUserWithTask.getUserName());
         User assignee = userService.findUserByUserName(user.getUserName());
-//        System.out.println(assignee);
+
         Assertions.assertNotNull(assignTaskResponse);
         Assertions.assertEquals(1,assignee.getAllTasks().size());
         Assertions.assertEquals(0,assigner.getAllTasks().size());
 
+    }
+    @Test
+    void shareTask(){
+        final RegisterUserRequest registerUserRequest = getRegisterUserRequest();
+        userService.registerUser(registerUserRequest);
+
+        GetUserRequest getUserRequest = new GetUserRequest();
+        getUserRequest.setEmail(registerUserRequest.getEmail());
+
+        User savedUser = userService.getUserByEmail(getUserRequest);
+        System.out.println(savedUser);
+        Assertions.assertNotNull(savedUser);
+        Assertions.assertEquals(1,userRepository.count());
+        User foundUser = userService.findUserByUserName(registerUserRequest.getUserName());
+        Assertions.assertEquals("Joseph",foundUser.getUserName());
+
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUserName(registerUserRequest.getEmail());
+        loginRequest.setUserName(registerUserRequest.getUserName());
+        loginRequest.setPassword(registerUserRequest.getPassword());
+        userService.login(loginRequest);
+
+        User userToLogin = userService.findUserByUserName(loginRequest.getUserName());
+        Assertions.assertNotNull(userToLogin);
+        Assertions.assertTrue(userToLogin.isLoggedIn());
+
+        final RegisterUserRequest registerUserRequest2 = getUserRequest("Victor", "victor@gmail.com");
+        userService.registerUser(registerUserRequest2);
+        Assertions.assertEquals(2,userRepository.count());
+        User user = userService.findUserByUserName(registerUserRequest2.getUserName());
+        Assertions.assertEquals("Victor",user.getUserName());
+
+        loginRequest.setUserName(registerUserRequest2.getEmail());
+        loginRequest.setUserName(registerUserRequest2.getUserName());
+        loginRequest.setPassword(registerUserRequest2.getPassword());
+        userService.login(loginRequest);
+
+        final CreateTaskRequest createTaskRequest = getCreateTaskRequest(foundUser);
+
+        CreateTaskResponse createTaskResponse = userService.createTask(createTaskRequest);
+        Assertions.assertNotNull(createTaskResponse);
+        User foundUserWithTask = userService.findUserByUserName(createTaskRequest.getUserName());
+        Assertions.assertEquals(1,foundUserWithTask.getAllTasks().size());
+
+        Task foundUserTask = userService.findTaskByTitle(createTaskRequest);
+        Assertions.assertEquals("Clean the house",foundUserTask.getTitle());
+
+        ShareTaskRequest shareTaskRequest = new ShareTaskRequest();
+        ShareTaskResponse shareTaskResponse = userService.shareTask(shareTaskRequest);
     }
     private static CreateTaskRequest getCreateTaskRequest(User foundUser) {
         CreateTaskRequest createTaskRequest = new CreateTaskRequest();

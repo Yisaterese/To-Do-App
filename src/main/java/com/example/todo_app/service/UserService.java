@@ -41,4 +41,6 @@ public interface UserService {
     UpdateUserResponse updateUser(UpdateUserRequest updateUserRequest);
 
     Task findTaskByTitle(CreateTaskRequest createTaskRequest);
+
+    ShareTaskResponse shareTask(ShareTaskRequest shareTaskRequest);
 }

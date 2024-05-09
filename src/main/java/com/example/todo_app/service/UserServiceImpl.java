@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService{
         User foundUser = userRepository.findUserByUserName(getUserRequest.getUserName());
         List<Task>  tasks = foundUser.getAllTasks();
         if (tasks.isEmpty())throw new TaskNotFoundException("No task found");
-        return  tasks;//taskService.findAllTaskByUser(getUserRequest);
+        return  tasks;
     }
 
     @Override
@@ -110,20 +110,23 @@ public class UserServiceImpl implements UserService{
         if(!existingUser.getEmail().equals(loginRequest.getUserName()))throw new UserNotFoundException("user not found");
     }
 
-    private static void validateIfIsNull(User existingUser) {
-        if(existingUser == null)throw new UserNotFoundException("User not found");
-    }
+
 
    @Override
     public LogOutResponse logOut(LogOutRequest logOutRequest){
         User existingUser = userRepository.findUserByUserName(logOutRequest.getUserName());
+
+        if(!existingUser.getUserName().equals(logOutRequest.getUserName()))throw new ExistingUserException("User does not exist");
         validateUser(logOutRequest, existingUser);
         validateIfIsNull(existingUser);
         validateAlreadyLoggedOut(existingUser);
         existingUser.setLoggedIn(false);
         userRepository.save(existingUser);
         return mapLogOutResponse(existingUser);
+    }
 
+    private static void validateIfIsNull(User existingUser) {
+        if(existingUser == null)throw new UserNotFoundException("User not found");
     }
 
     private void validateAlreadyLoggedOut(User existingUser) {
@@ -145,8 +148,7 @@ public class UserServiceImpl implements UserService{
         validateIfIsNull(assignee);
         validateIfIsNull(assigner);
         if(!assigner.isLoggedIn())throw new UserNotLoggedInException("User not logged in");
-        Task assignerTask_toBeAssigned = assigner.getAllTasks().stream().filter(task ->
-                task.getTitle().equals(assignTaskRequest.getTitle())).findFirst().orElseThrow(() -> new TaskNotFoundException("Task not found"));
+        Task assignerTask_toBeAssigned = assigner.getAllTasks().stream().filter(task -> task.getTitle().equals(assignTaskRequest.getTitle())).findFirst().orElseThrow(() -> new TaskNotFoundException("Task not found"));
 
         List<Task> assigneeTasks = assignee.getAllTasks();
         assigneeTasks.add(assignerTask_toBeAssigned);
@@ -157,6 +159,26 @@ public class UserServiceImpl implements UserService{
         userRepository.save(assigner);
 
         return mapAssignTaskResponse(assigner, assignee);
+    }
+
+    @Override
+    public ShareTaskResponse shareTask(ShareTaskRequest shareTaskRequest) {
+        return null;
+    }
+
+    @Override
+    public UpdateUserResponse updateUser(UpdateUserRequest updateUserRequest) {
+        User foundUser = findUserByUserName(updateUserRequest.getUserName());
+        if(!foundUser.isLoggedIn())throw new UserNotLoggedInException("User not logged in");
+        foundUser.setUserName(updateUserRequest.getUserName());
+        foundUser.setPassword(updateUserRequest.getPassword());
+        foundUser.setEmail(updateUserRequest.getEmail());
+        foundUser.setUserAddress(updateUserRequest.getUserAddress());
+        foundUser.setPhoneNumber(updateUserRequest.getPhoneNumber());
+        foundUser.setDateOFBirth(updateUserRequest.getDateOFBirth());
+        userRepository.delete(foundUser);
+        userRepository.save(foundUser);
+        return mapUpdateUserResponse(foundUser);
     }
 
     @Override
@@ -198,24 +220,10 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UpdateUserResponse updateUser(UpdateUserRequest updateUserRequest) {
-        User foundUser = findUserByUserName(updateUserRequest.getUserName());
-        if(!foundUser.isLoggedIn())throw new UserNotLoggedInException("User not logged in");
-        foundUser.setUserName(updateUserRequest.getUserName());
-        foundUser.setPassword(updateUserRequest.getPassword());
-        foundUser.setEmail(updateUserRequest.getEmail());
-        foundUser.setUserAddress(updateUserRequest.getUserAddress());
-        foundUser.setPhoneNumber(updateUserRequest.getPhoneNumber());
-        foundUser.setDateOFBirth(updateUserRequest.getDateOFBirth());
-        userRepository.delete(foundUser);
-        userRepository.save(foundUser);
-        return mapUpdateUserResponse(foundUser);
-    }
-
-    @Override
     public Task findTaskByTitle(CreateTaskRequest createTaskRequest) {
         return taskService.findTaskByUser(createTaskRequest.getUserName());
     }
+
 
 
 }

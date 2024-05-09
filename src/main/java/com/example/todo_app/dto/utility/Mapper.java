@@ -43,7 +43,7 @@ public class Mapper {
        updateUserResponse.setPhoneNumber(user.getPhoneNumber());
        updateUserResponse.setEmail(user.getEmail());
        updateUserResponse.setUserAddress(user.getUserAddress());
-       updateUserResponse.setDateOFBirth(user.getDateOFBirth());
+       updateUserResponse.setDateOFBirth(LocalDate.now());
        return updateUserResponse;
     }
 

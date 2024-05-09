@@ -135,4 +135,14 @@ public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
             return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()),HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PostMapping("/update_user")
+    public ResponseEntity<?> update(@RequestBody UpdateUserRequest updateUserRequest){
+        try{
+           UpdateUserResponse response = userService.updateUser(updateUserRequest);
+            return  new ResponseEntity<>(new ApiResponse(true, response),HttpStatus.OK);
+        }catch (ToDoRunTimeException exception){
+            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()),HttpStatus.BAD_REQUEST);
+        }
+    }
 }

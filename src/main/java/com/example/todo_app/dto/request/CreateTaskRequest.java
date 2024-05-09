@@ -1,6 +1,8 @@
 package com.example.todo_app.dto.request;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 
 @Data
 public class CreateTaskRequest {
@@ -9,8 +11,7 @@ public class CreateTaskRequest {
     private String taskPriority;
     private String taskUniqueNumber;
     private String userName;
-    //private String dueDate;
-    //private LocalDate dateCreated;
-    //private String estimatedTime;
+//    private String dueDate;
+//    private LocalDate dateCreated;
 
 }
