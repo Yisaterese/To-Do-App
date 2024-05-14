@@ -1,9 +1,9 @@
 package com.example.todo_app.service;
 
+import com.example.todo_app.data.dto.request.*;
+import com.example.todo_app.data.dto.response.*;
 import com.example.todo_app.data.model.Task;
 import com.example.todo_app.data.model.User;
-import com.example.todo_app.dto.request.*;
-import com.example.todo_app.dto.response.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,9 +18,9 @@ public interface UserService {
 
     DeleteAllTaskResponse deleteAllTasks();
 
-    List<Task> getUserTasks(GetAllTasksByUserRequest getUserRequest);
+    List<Task> getUserTasks(viewAllTasksByUserRequest getUserRequest);
 
-    DeleteTaskResponse deleteTaskByUserName(DeleteTaskRequest deleteTaskRequest);
+    DeleteTaskResponse deleteTaskByUser(DeleteTaskRequest deleteTaskRequest);
 
     LoginResponse login(LoginRequest loginRequest);
 
@@ -35,12 +35,25 @@ public interface UserService {
     DeleteAllUserResponse deleteAllUsers();
 
     User findUserByUserName(String userName);
+    User findUserById(String id);
 
     DeleteUserResponse deleteUserByUserName(DeleteUserRequest deleteUserRequest);
 
-    UpdateUserResponse updateUser(UpdateUserRequest updateUserRequest);
-
-    Task findTaskByTitle(CreateTaskRequest createTaskRequest);
+    UpdateUserResponse updateUserProfile(UpdateUserRequest updateUserRequest);
 
     ShareTaskResponse shareTask(ShareTaskRequest shareTaskRequest);
+
+    DeleteAllTaskResponse deleteAllTasksByUser(DeleteAllTaskByUserRequest deleteTaskByUserRequest);
+
+    List<Task> getAllTaskSByUser(viewAllTasksByUserRequest viewAllTasksByUserrequest);
+
+
+    List<Task> findUserTasksByPriority(viewAllTasByPriorityRequest getTaskByPriorityRequest);
+
+    List<Task> getAllPendingTasksByUser(GetUserPendingTasksRequest getAllPendingTasksRequests);
+
+
+    Task findTaskByTitle(GetTaskRequest getTaskRequest);
+
+    UpDateTaskResponse updateTask(UpDateTaskRequest upDateTaskRequest);
 }
