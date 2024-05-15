@@ -14,8 +14,6 @@ public interface UserService {
 
     CreateTaskResponse createTask(CreateTaskRequest createTaskRequest);
 
-    List<Task> displayAllTasks();
-
     DeleteAllTaskResponse deleteAllTasks();
 
     List<Task> getUserTasks(viewAllTasksByUserRequest getUserRequest);
@@ -31,8 +29,6 @@ public interface UserService {
     User getUserByEmail(GetUserRequest getUserRequest);
 
     List<User> getAllUsers();
-
-    DeleteAllUserResponse deleteAllUsers();
 
     User findUserByUserName(String userName);
     User findUserById(String id);

@@ -98,26 +98,6 @@ public class TaskController {
 
 
 
-    //    @GetMapping("/findAllTasks")
-//    public  ResponseEntity<?> getAllTasks(){
-//        try{
-//            List<Task> tasks = userService.displayAllTasks();
-//            return new ResponseEntity<>(new ApiResponse(true,tasks),HttpStatus.OK);
-//        }catch (ToDoRunTimeException exception){
-//            return new ResponseEntity<>(new ApiResponse(false,exception.getMessage()),HttpStatus.BAD_REQUEST);
-//        }
-//    }
-//    @DeleteMapping("/deleteAllTasks")
-//    public ResponseEntity<?> deleteAllTasks() {
-//        try {
-//            DeleteAllTaskResponse response = userService.deleteAllTasks();
-//            return new ResponseEntity<>(new ApiResponse(true, response), HttpStatus.OK);
-//        } catch (ToDoRunTimeException exception) {
-//            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()), HttpStatus.BAD_REQUEST);
-//        }
-//    }
-//
-
 
 }
 

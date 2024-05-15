@@ -38,13 +38,13 @@ public class TaskServiceImpl implements TaskService {
     }
     @Override
     public List<Task> findAllTaskByUser(viewAllTasksByUserRequest getUserRequest) {
-        List<Task> foundTasks = taskRepository.findTasksByUserId(getUserRequest.getUserId());
+        List<Task> foundTasks = taskRepository.findByUserId(getUserRequest.getUserId());
         if (foundTasks.isEmpty())throw new ToDoRunTimeException("No task found");
         return foundTasks;
     }
     @Override
     public List<Task> findAllTaskByUser(String userId) {
-        List<Task> foundTasks = taskRepository.findTasksByUserId(userId);
+        List<Task> foundTasks = taskRepository.findByUserId(userId);
         if (foundTasks.isEmpty())throw new ToDoRunTimeException("No task found");
         return foundTasks;
     }
@@ -74,7 +74,7 @@ public class TaskServiceImpl implements TaskService {
 
     private static void setDate(CreateTaskRequest createTaskRequest, Task newTask) {
         newTask.setDateCreated(LocalDate.now());
-        newTask.setDueDate(formatDate(createTaskRequest.getDueDate()));
+       // newTask.setDueDate(formatDate(createTaskRequest.getDueDate()));
     }
 
     private static LocalDate formatDate(String createTaskRequest){
@@ -93,7 +93,7 @@ public class TaskServiceImpl implements TaskService {
     }
     @Override
     public List<Task> getAllTasksByUser(String id) {
-        return taskRepository.findTasksByUserId(id);
+        return taskRepository.findByUserId(id);
     }
 
 @Override
@@ -119,10 +119,11 @@ public Task updateUserTask(UpDateTaskRequest upDateTaskRequest, User existingUse
     }
 
     @Override
-    public DeleteAllTaskResponse deleteAllTasks() {
-        List<Task> tasks = taskRepository.findAll();
+    public DeleteAllTaskResponse deleteAllTasks(User user) {
+        List<Task> tasks = taskRepository.findByUserId(user.getId());
         if(tasks.isEmpty())throw new ToDoRunTimeException("No task found");
-        taskRepository.deleteAll();
+        user.getAllTasks().clear();
+        taskRepository.deleteAll(tasks);
         return mapDeleteTasksResponse();
     }
 }

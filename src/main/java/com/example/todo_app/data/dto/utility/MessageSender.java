@@ -13,10 +13,10 @@ import java.util.regex.Pattern;
 public class MessageSender {
     @Autowired
      JavaMailSender javaMailSender;
+    SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+    static String senderMailAddress = "teresejosephyisa@gmail.com";
 
   public  void registrationMessage(RegisterUserRequest userRequest){
-      SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-      String senderMailAddress = "teresejosephyisa@gmail.com";
       simpleMailMessage.setFrom(senderMailAddress);
       simpleMailMessage.setTo(userRequest.getEmail());
       simpleMailMessage.setSubject(Message.registrationMessageSubject());
@@ -24,8 +24,26 @@ public class MessageSender {
       javaMailSender.send(simpleMailMessage);
 
   }
+    public  void shareTaskMessage(String userName, String title, String email){
+        simpleMailMessage.setFrom(senderMailAddress);
+        simpleMailMessage.setTo(email);
+        simpleMailMessage.setSubject(Message.shareTaskSubjectMessage());
+        simpleMailMessage.setText(Message.shareTaskMessage(title,userName));
+        javaMailSender.send(simpleMailMessage);
 
-  public static boolean isValidEmail(String userEmail){
+    }
+
+    public  void assignTaskMessage(String userName, String title, String email){
+        simpleMailMessage.setFrom(senderMailAddress);
+        simpleMailMessage.setTo(email);
+        simpleMailMessage.setSubject(Message.assigneTaskSubject());
+        simpleMailMessage.setText(Message.assignTaskMessage(userName, title));
+        javaMailSender.send(simpleMailMessage);
+
+    }
+
+
+    public static boolean isValidEmail(String userEmail){
       String emailPattern = "^(?!do)(?!.*\\.\\.)(?!.*\\.\\.)(?!.*\\.\\.)(?=.*[a-z])[a-z]+\\.[a-z]+@([a-z]+\\.)?com$";
       Pattern pattern = Pattern.compile(emailPattern);
       Matcher matcher = pattern.matcher(userEmail);

@@ -2,8 +2,6 @@ package com.example.todo_app.controller;
 
 import com.example.todo_app.data.dto.request.*;
 import com.example.todo_app.data.dto.response.*;
-import com.example.todo_app.data.model.Task;
-import com.example.todo_app.data.model.User;
 import com.example.todo_app.data.dto.utility.exception.ToDoRunTimeException;
 import com.example.todo_app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,38 +62,6 @@ public class UserController {
 
 
 
-
-
-//    @GetMapping("/getUser")
-//    public ResponseEntity<?> getUser(@RequestBody GetUserRequest getUserRequest){
-//        try{
-//            User user = userService.getUserByEmail(getUserRequest);
-//            return new ResponseEntity<>(new ApiResponse(true,user),HttpStatus.OK);
-//            }catch (ToDoRunTimeException exception){
-//            return new ResponseEntity<>(new ApiResponse(false,exception.getMessage()),HttpStatus.BAD_REQUEST);
-//        }
-//    }
-//
-//    @GetMapping("/getAllUsers")
-//    public ResponseEntity<?> getAllUsers(){
-//        try {
-//            List<User> allUsers = userService.getAllUsers();
-//            return  new ResponseEntity<>(new ApiResponse(true,allUsers),HttpStatus.OK);
-//        }catch (ToDoRunTimeException exception){
-//            return  new ResponseEntity<>( new ApiResponse(false, exception.getMessage()),HttpStatus.BAD_REQUEST);
-//        }
-//    }
-//
-//    @DeleteMapping("/deleteAllUsers")
-//    public ResponseEntity<?> deleteAllUsers(){
-//        try {
-//            DeleteAllUserResponse response = userService.deleteAllUsers();
-//            return new ResponseEntity<>(new ApiResponse(true, response),HttpStatus.OK);
-//        }catch (ToDoRunTimeException exception){
-//            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()),HttpStatus.BAD_REQUEST);
-//        }
-//
-//    }
 
 
 }

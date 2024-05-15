@@ -1,11 +1,9 @@
 package com.example.todo_app.data.dto.utility;
 
-import com.example.todo_app.data.dto.request.SendMailResponse;
+import com.example.todo_app.data.dto.response.SendMailResponse;
 import com.example.todo_app.data.dto.response.*;
 import com.example.todo_app.data.model.Task;
 import com.example.todo_app.data.model.User;
-
-import java.time.LocalDate;
 
 public class Mapper {
     public static RegisterUserResponse mapRegisterResponse(User user){

@@ -14,15 +14,18 @@ import java.util.List;
 
 @Service
 public interface TaskService {
+  void deleteAllUserTask(List<Task> tasks);
   Task createTask(CreateTaskRequest createTaskRequest);
     List<Task> findAllTasks();
-Task updateUserTask(UpDateTaskRequest upDateTaskRequest, User existingUser);
+Task  updateUserTask(UpDateTaskRequest upDateTaskRequest, User existingUser);
 
-  DeleteAllTaskResponse deleteAllTasks();
+  DeleteAllTaskResponse deleteAllTasks(User user);
     DeleteTaskResponse deleteTaskByUser(DeleteTaskRequest deleteTaskRequest);
+
   List<Task> findAllTaskByUser(viewAllTasksByUserRequest getUserRequest);
+
   List<Task> findAllTaskByUser(String userid);
   Task findTaskById(String userId);
-  void deleteAllUserTask(List<Task> tasks);
+
   List<Task> getAllTasksByUser(String id);
 }

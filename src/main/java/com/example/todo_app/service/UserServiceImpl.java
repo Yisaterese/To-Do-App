@@ -26,9 +26,15 @@ public class UserServiceImpl implements UserService{
     TaskService taskService;
     @Override
     public RegisterUserResponse registerUser(RegisterUserRequest createTaskRequest){
+        validateRegisterRequestIsNotBlank(createTaskRequest);
         userRepository.findAll().forEach(user ->{if(user.getEmail().equals(createTaskRequest.getEmail()))throw new ToDoRunTimeException("email taken");});
         final User newUser = getUserCreated(createTaskRequest);
         return mapRegisterResponse(newUser);
+    }
+
+    private static void validateRegisterRequestIsNotBlank(RegisterUserRequest createTaskRequest) {
+        if(createTaskRequest.getEmail().isBlank())throw new ToDoRunTimeException("Please enter a valid email address");
+        if(createTaskRequest.getUserName().isBlank())throw new ToDoRunTimeException("Please enter a valid username");
     }
 
     private User getUserCreated(RegisterUserRequest createTaskRequest) {
@@ -52,19 +58,16 @@ public class UserServiceImpl implements UserService{
     @Override
     public LoginResponse login(LoginRequest loginRequest){
         User existingUser = userRepository.findUserById(loginRequest.getUserId());
-        validateUser(loginRequest, existingUser);
+        findAndValidateUser(loginRequest, existingUser);
         userRepository.save(existingUser);
         return  mapLoginResponse(existingUser);
     }
 
-    private void validateUser(LoginRequest loginRequest, User existingUser) {
+    private void findAndValidateUser(LoginRequest loginRequest, User existingUser) {
         validateIfUserIsNull(existingUser);
         validateAlreadyLoggedIn(existingUser);
         setUserProperties(loginRequest, existingUser);
     }
-
-
-
 
 
     @Override
@@ -74,6 +77,11 @@ public class UserServiceImpl implements UserService{
         ifUserLoggedIn(foundUser);
         final Task createdTask = getCreatedTask(createTaskRequest, foundUser);
         return mapCreateTaskResponse(createdTask);
+    }
+
+    @Override
+    public DeleteAllTaskResponse deleteAllTasks() {
+        return null;
     }
 
     private Task getCreatedTask(CreateTaskRequest createTaskRequest, User foundUser) {
@@ -94,17 +102,6 @@ public class UserServiceImpl implements UserService{
         User foundUser = userRepository.findUserById(createTaskRequest.getUserId());
         if (foundUser == null) throw new ToDoRunTimeException("User not found");
         return foundUser;
-    }
-
-    @Override
-    public List<Task> displayAllTasks(){
-        return taskService.findAllTasks();
-    }
-
-    @Override
-    public DeleteAllTaskResponse deleteAllTasks(){
-        return taskService.deleteAllTasks();
-
     }
 
     @Override
@@ -144,8 +141,6 @@ public class UserServiceImpl implements UserService{
         if(!existingUser.getId().equals(loginRequest.getUserId()))throw new ToDoRunTimeException("user not found");
     }
 
-
-
    @Override
     public LogOutResponse logOut(LogOutRequest logOutRequest){
        final User existingUser = isValidUser(logOutRequest);
@@ -161,7 +156,7 @@ public class UserServiceImpl implements UserService{
     }
 
     private void isValidUserToLogOut(LogOutRequest logOutRequest, User existingUser) {
-        validateUser(logOutRequest, existingUser);
+        findAndValidateUser(logOutRequest, existingUser);
         validateIfUserIsNull(existingUser);
         validateAlreadyLoggedOut(existingUser);
     }
@@ -178,7 +173,7 @@ public class UserServiceImpl implements UserService{
         return userRepository.findUserByUserName(logOutRequest.getUserId());
     }
 
-    private static void validateUser(LogOutRequest logOutRequest, User existingUser) {
+    private static void findAndValidateUser(LogOutRequest logOutRequest, User existingUser) {
         if(!existingUser.getId().equals(logOutRequest.getUserId()))throw new ToDoRunTimeException("user not found");
     }
 
@@ -186,8 +181,9 @@ public class UserServiceImpl implements UserService{
     public AssignTaskResponse assignTask(AssignTaskRequest assignTaskRequest){
         User assignee = findUserById(assignTaskRequest.getAssigneeUserId());
         User assigner = findUserById(assignTaskRequest.getAssignerUserId());
-        validateUser(assignee, assigner);
+        findAndValidateUser(assignee, assigner);
         assignTaskToAssignee(assignee,  assignTaskRequest,assigner);
+        messageSender.assignTaskMessage(assignTaskRequest.getTitle(),assignee.getEmail(),assignee.getUserName());
         return mapAssignTaskResponse(assigner, assignee);
     }
 
@@ -215,7 +211,7 @@ public class UserServiceImpl implements UserService{
         userRepository.save(assigner);
     }
 
-    private static void validateUser(User assignee, User assigner) {
+    private static void findAndValidateUser(User assignee, User assigner) {
         validateIfUserIsNull(assignee);
         validateIfUserIsNull(assigner);
         ifUserLoggedIn(assigner);
@@ -225,8 +221,9 @@ public class UserServiceImpl implements UserService{
     public ShareTaskResponse shareTask(ShareTaskRequest shareTaskRequest) {
         User assignee = findUserById(shareTaskRequest.getAssigneeId());
         User assigner = findUserById(shareTaskRequest.getAssignerId());
-        validateUser(assignee, assigner);
+        findAndValidateUser(assignee, assigner);
         shareTask(shareTaskRequest, assigner, assignee);
+        messageSender.shareTaskMessage(assignee.getUserName(),assignee.getEmail(),shareTaskRequest.getTitle());
         return mapShareTaskResponse();
     }
 
@@ -246,24 +243,11 @@ public class UserServiceImpl implements UserService{
     @Override
     public DeleteAllTaskResponse deleteAllTasksByUser(DeleteAllTaskByUserRequest deleteTaskByUserRequest) {
         User foundUser =    findUserById(deleteTaskByUserRequest.getUserId());
-        deleteAllUserTasks(foundUser);
-        clearUserTasks(foundUser);
+        validateIfUserIsNull(foundUser);
+        taskService.deleteAllTasks(foundUser);
         return mapDeleteTasksResponse();
     }
 
-    private void clearUserTasks(User foundUser) {
-        taskService.findAllTasks().forEach(task -> {if(task.getUserId().equals(foundUser.getId()))taskService.deleteAllTasks();});
-        List<Task> allTasks = validateTasks(foundUser);
-        allTasks.clear();
-        userRepository.save(foundUser);
-    }
-
-    private void deleteAllUserTasks(User foundUser) {
-        final List<Task> tasks = validateTasks(foundUser);
-        taskService.deleteAllUserTask(tasks);
-        foundUser.setAllTasks(new ArrayList<>());
-        userRepository.save(foundUser);
-    }
 
     private static List<Task> validateTasks(User foundUser) {
         List<Task> tasks = foundUser.getAllTasks();
@@ -301,6 +285,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UpdateUserResponse updateUserProfile(UpdateUserRequest updateUserRequest) {
+        //if(updateUserRequest.getUserId() == null) throw new ToDoRunTimeException("Could not read your request;");
         User foundUser = findUserById(updateUserRequest.getUserId());
         ifUserLoggedIn(foundUser);
         update(updateUserRequest, foundUser);
@@ -332,15 +317,6 @@ public class UserServiceImpl implements UserService{
 
 
     @Override
-    public DeleteAllUserResponse deleteAllUsers() {
-        List<User> foundUsers = getAllUsers();
-        if(foundUsers.isEmpty())throw new ToDoRunTimeException("No User found");
-        userRepository.deleteAll();
-        return mapDeleteAllUsersResponse();
-    }
-
-
-    @Override
     public List<User> getAllUsers(){
         List<User> allUsers = userRepository.findAll();
         if(allUsers.isEmpty())throw  new ToDoRunTimeException("No user found");
@@ -356,8 +332,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User findUserById(String id) {
-        return userRepository.findById(id)
-                .orElseThrow(()-> new ToDoRunTimeException("User not found"));
+        return userRepository.findById(id).orElseThrow(()-> new ToDoRunTimeException("User not found"));
     }
 
     @Override
@@ -370,24 +345,33 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public Task findTaskByTitle(GetTaskRequest getTaskRequest) {
-        return   taskService.findAllTaskByUser(getTaskRequest.getUserId()).stream().filter(task -> task.getTitle().equals(getTaskRequest.getTitle().toLowerCase().trim())).findFirst().orElseThrow(() -> new ToDoRunTimeException("Task not found"));
-
+        List<Task> userTasks = taskService.findAllTaskByUser(getTaskRequest.getUserId());
+        return userTasks.stream().filter(task -> task.getTitle().equals(getTaskRequest.getTitle().toLowerCase().trim())).findFirst().orElseThrow(()-> new ToDoRunTimeException("No task found"));
     }
 
     @Override
     public UpDateTaskResponse updateTask(UpDateTaskRequest upDateTaskRequest){
+        final User founduser = findAndValidateUser(upDateTaskRequest);
+        Task updatedTask = taskService.updateUserTask(upDateTaskRequest,founduser);
+        Task existingTaskToBeUpdated = founduser.getAllTasks().stream().filter(task -> task.getTitle().equals(upDateTaskRequest.getTaskToBeUpdatedTitle().toLowerCase().trim())).findFirst().orElseThrow(() -> new ToDoRunTimeException("Task not found"));
+        updateTask(existingTaskToBeUpdated, founduser, updatedTask);
+        return mapUDateTaskResponse();
+    }
+
+    private User findAndValidateUser(UpDateTaskRequest upDateTaskRequest) {
         User founduser = userRepository.findUserById(upDateTaskRequest.getUserId());
         validateIfUserIsNull(founduser);
-        Task updatedTask = taskService.updateUserTask(upDateTaskRequest,founduser);
-        Task existingTask = founduser.getAllTasks().stream().filter(task -> task.getTitle().equals(upDateTaskRequest.getTaskToBeUpdatedTitle().toLowerCase().trim())).findFirst().orElseThrow(() -> new ToDoRunTimeException("Task not found"));
-
-        founduser.getAllTasks().remove(existingTask);
-        List<Task> userTask = founduser.getAllTasks();
-        userTask.add(updatedTask);
-        founduser.setAllTasks(userTask);
-        return mapUDateTaskResponse();
-
+        return founduser;
     }
+
+    private  void updateTask(Task existingTask,User foundUser,Task upDatedTask ){
+        foundUser .getAllTasks().remove(existingTask);
+        List<Task> userTask = foundUser .getAllTasks();
+        userTask.add(upDatedTask);
+        foundUser .setAllTasks(userTask);
+        userRepository.save(foundUser);
+
+    };
 
 
 
