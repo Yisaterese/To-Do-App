@@ -1,13 +1,13 @@
 package com.example.todo_app.data.dto.request;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.time.LocalDate;
-
-@Data
+@Setter
+@Getter
 public class UpdateUserRequest {
     private String userId;
-    private String userName;
-    private String password;
-    private String email;
+    private String userNameTBeUpdated;
+    private String passwordToBeUpdated;
+    private String emailToBeUpdated;
 }

@@ -73,8 +73,8 @@ public class UserServiceImpl implements UserService{
     @Override
     public CreateTaskResponse createTask(CreateTaskRequest createTaskRequest) {
         final User foundUser = getUser(createTaskRequest);
-        foundUser.getAllTasks().forEach(task -> {if(task.getTitle().equals(createTaskRequest.getTitle().trim()))throw new ToDoRunTimeException("Task with "+createTaskRequest.getTitle()+" already created");});
-        ifUserLoggedIn(foundUser);
+        foundUser.getAllTasks().forEach(task -> {if(task.getTitle().equals(createTaskRequest.getTitle().trim()))throw new ToDoRunTimeException(foundUser.getUserName()+" already have task with title "+createTaskRequest.getTitle());});
+        validateUserLogin(foundUser);
         final Task createdTask = getCreatedTask(createTaskRequest, foundUser);
         return mapCreateTaskResponse(createdTask);
     }
@@ -182,10 +182,14 @@ public class UserServiceImpl implements UserService{
     public AssignTaskResponse assignTask(AssignTaskRequest assignTaskRequest){
         User assignee = findUserById(assignTaskRequest.getAssigneeUserId());
         User assigner = findUserById(assignTaskRequest.getAssignerUserId());
-        findAndValidateUser(assignee, assigner);
-        assignTaskToAssignee(assignee,  assignTaskRequest,assigner);
-        messageSender.assignTaskMessage(assignee,assignTaskRequest.getTitle());
+        assignTaskToAssigneeAndNotify(assignTaskRequest, assignee, assigner);
         return mapAssignTaskResponse(assigner, assignee);
+    }
+
+    private void assignTaskToAssigneeAndNotify(AssignTaskRequest assignTaskRequest, User assignee, User assigner) {
+        findAndValidateUser(assignee, assigner);
+        assignTaskToAssignee(assignee, assignTaskRequest, assigner);
+        messageSender.assignTaskMessage(assignee, assignTaskRequest.getTitle());
     }
 
     private void assignTaskToAssignee(User assignee,AssignTaskRequest assignTaskRequest, User assigner) {
@@ -214,13 +218,21 @@ public class UserServiceImpl implements UserService{
     private void deleteAssignedTaskFromAssigner(Task assignerTask_toBeAssigned, User assigner) {
         List<Task> assignerTasks = assigner.getAllTasks();
         assignerTasks.remove(assignerTask_toBeAssigned);
+        assigner.setAllTasks(assignerTasks);
+        removeTaskFromPendingTaskList(assignerTask_toBeAssigned, assigner, assignerTasks);
         userRepository.save(assigner);
+    }
+
+    private static void removeTaskFromPendingTaskList(Task assignerTask_toBeAssigned, User assigner, List<Task> assignerTasks) {
+        List<Task> pendingTasks = assigner.getPendingTasks();
+        pendingTasks.remove(assignerTask_toBeAssigned);
+        assigner.setPendingTasks(assignerTasks);
     }
 
     private static void findAndValidateUser(User assignee, User assigner) {
         validateIfUserIsNull(assignee);
         validateIfUserIsNull(assigner);
-        ifUserLoggedIn(assigner);
+        validateUserLogin(assigner);
     }
 
     @Override
@@ -314,7 +326,7 @@ public class UserServiceImpl implements UserService{
     public List<Task> findUserTasksByPriority(viewAllTasByPriorityRequest getTaskByPriorityRequest) {
         User existinguser = findUserById(getTaskByPriorityRequest.getUserId());
         validateIfUserIsNull(existinguser);
-        ifUserLoggedIn(existinguser);
+        validateUserLogin(existinguser);
         return getAllUserTasks(getTaskByPriorityRequest);
     }
 
@@ -340,9 +352,8 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UpdateUserResponse updateUserProfile(UpdateUserRequest updateUserRequest) {
-        if(updateUserRequest.getUserId() == null) throw new ToDoRunTimeException("Could not read your request;");
         User foundUser = findUserById(updateUserRequest.getUserId());
-        ifUserLoggedIn(foundUser);
+        validateUserLogin(foundUser);
         update(updateUserRequest, foundUser);
         return mapUpdateUserResponse(foundUser);
     }
@@ -354,11 +365,11 @@ public class UserServiceImpl implements UserService{
     }
 
     private static void setProfile(UpdateUserRequest updateUserRequest, User foundUser) {
-        foundUser.setUserName(updateUserRequest.getUserName());
-        foundUser.setPassword(updateUserRequest.getPassword());
-        foundUser.setEmail(updateUserRequest.getEmail());
+        foundUser.setUserName(updateUserRequest.getUserNameTBeUpdated());
+        foundUser.setPassword(updateUserRequest.getPasswordToBeUpdated());
+        foundUser.setEmail(updateUserRequest.getEmailToBeUpdated());
     }
-    private static void ifUserLoggedIn(User foundUser) {
+    private static void validateUserLogin(User foundUser) {
         if(!foundUser.isLoggedIn())throw new ToDoRunTimeException("User not logged in");
     }
 

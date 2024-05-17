@@ -144,9 +144,9 @@ public class UserServiceImplTest {
         Assertions.assertNotNull(userToLogin);
         Assertions.assertTrue(userToLogin.isLoggedIn());
 
-        updateUserRequest.setPassword(userToLogin.getPassword());
-        updateUserRequest.setEmail(userToLogin.getEmail());
-        updateUserRequest.setUserName(userToLogin.getUserName());
+        updateUserRequest.setPasswordToBeUpdated(userToLogin.getPassword());
+        updateUserRequest.setEmailToBeUpdated(userToLogin.getEmail());
+        updateUserRequest.setUserNameTBeUpdated(userToLogin.getUserName());
         updateUserRequest.setUserId(registerUserResponse.getUserId());
 
         UpdateUserResponse updateUserResponse = userService.updateUserProfile(updateUserRequest);

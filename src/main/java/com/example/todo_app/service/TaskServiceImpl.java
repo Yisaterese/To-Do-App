@@ -123,12 +123,12 @@ public Task updateUserTask(UpDateTaskRequest upDateTaskRequest, User existingUse
     private static void updateTaskProperties(UpDateTaskRequest upDateTaskRequest, Task taskTobe_updated) {
         taskTobe_updated.setTaskPriority(upDateTaskRequest.getTaskPriority());
         taskTobe_updated.setTitle(upDateTaskRequest.getTaskToBeUpdatedTitle());
-        //taskTobe_updated.setDueDate(formatDate(upDateTaskRequest.getDueDate()));
+        taskTobe_updated.setDueDate(formatDate(upDateTaskRequest.getDueDate()));
         taskTobe_updated.setDescription(upDateTaskRequest.getDescription());
     }
 
     private static Task getTaskTo_toBeUpdated(UpDateTaskRequest upDateTaskRequest, User existingUser) {
-        Task taskTobe_updated = existingUser.getAllTasks().stream().filter(task -> task.getTitle().equals(upDateTaskRequest.getTaskToBeUpdatedTitle().toLowerCase().trim())).findFirst().orElseThrow(() -> new ToDoRunTimeException("Task not found"));
+        Task taskTobe_updated = existingUser.getAllTasks().stream().filter((task) -> task.getTitle().equals(upDateTaskRequest.getTaskToBeUpdatedTitle().toLowerCase().trim())).findFirst().orElseThrow(() -> new ToDoRunTimeException("Task not found"));
         return validateIfTaskIsNull(taskTobe_updated);
     }
 

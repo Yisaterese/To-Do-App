@@ -3,7 +3,7 @@ package com.example.todo_app.data.dto.request;
 import lombok.Data;
 
 @Data
-public class UpDateTaskRequest {
+public class    UpDateTaskRequest {
     private String title;
     private String description;
     private String dueDate;
