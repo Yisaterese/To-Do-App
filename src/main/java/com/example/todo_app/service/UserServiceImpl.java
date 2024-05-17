@@ -94,6 +94,7 @@ public class UserServiceImpl implements UserService{
     private void addTaskCreatedToUser(User foundUser, List<Task> tasks, Task createdTask) {
         tasks.add(createdTask);
         foundUser.setAllTasks(tasks);
+        foundUser.getPendingTasks().forEach(task -> {if(task.getTitle().equals(createdTask.getTitle()))throw new ToDoRunTimeException("Task with "+createdTask.getTitle()+" already exist");});
         foundUser.setPendingTasks(tasks);
         userRepository.save(foundUser);
     }
@@ -183,16 +184,21 @@ public class UserServiceImpl implements UserService{
         User assigner = findUserById(assignTaskRequest.getAssignerUserId());
         findAndValidateUser(assignee, assigner);
         assignTaskToAssignee(assignee,  assignTaskRequest,assigner);
-        messageSender.assignTaskMessage(assignTaskRequest.getTitle(),assignee.getEmail(),assignee.getUserName());
+        messageSender.assignTaskMessage(assignee,assignTaskRequest.getTitle());
         return mapAssignTaskResponse(assigner, assignee);
     }
 
     private void assignTaskToAssignee(User assignee,AssignTaskRequest assignTaskRequest, User assigner) {
         final Task assignerTask_toBeAssigned = getTask(assigner, assignTaskRequest.getTitle().toLowerCase().trim());
+        assign_taskTo(assignee, assignerTask_toBeAssigned);
+        deleteAssignedTaskFromAssigner(assignerTask_toBeAssigned, assigner);
+    }
+
+    private void assign_taskTo(User assignee, Task assignerTask_toBeAssigned) {
         final List<Task> assigneeTasks = addTaskToBeAssigned_toAssignee(assignee, assignerTask_toBeAssigned);
         assignee.setAllTasks(assigneeTasks);
+        assignee.setPendingTasks(assigneeTasks);
         userRepository.save(assignee);
-        deleteAssignedTaskFromAssigner(assignerTask_toBeAssigned, assigner);
     }
 
     private static Task getTask(User assigner, String title) {
@@ -223,7 +229,7 @@ public class UserServiceImpl implements UserService{
         User assigner = findUserById(shareTaskRequest.getAssignerId());
         findAndValidateUser(assignee, assigner);
         shareTask(shareTaskRequest, assigner, assignee);
-        messageSender.shareTaskMessage(assignee.getUserName(),assignee.getEmail(),shareTaskRequest.getTitle());
+        messageSender.shareTaskMessage(assignee, shareTaskRequest.getTitle());
         return mapShareTaskResponse();
     }
 
@@ -242,12 +248,30 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public DeleteAllTaskResponse deleteAllTasksByUser(DeleteAllTaskByUserRequest deleteTaskByUserRequest) {
-        User foundUser =    findUserById(deleteTaskByUserRequest.getUserId());
+        final User foundUser = findUser(deleteTaskByUserRequest);
         validateIfUserIsNull(foundUser);
-        taskService.deleteAllTasks(foundUser);
+        deleteAllUserTasks(foundUser);
         return mapDeleteTasksResponse();
     }
 
+    private void deleteAllUserTasks(User foundUser) {
+        final List<Task> allTasks = getAllUserTasks(foundUser);
+        allTasks.clear();
+        userRepository.save(foundUser);
+        taskService.deleteAllTasks(foundUser);
+    }
+
+    private static List<Task> getAllUserTasks(User foundUser) {
+        List<Task> allTasks = foundUser.getAllTasks();
+        if(allTasks.isEmpty())throw  new ToDoRunTimeException("No task found for user");
+        return allTasks;
+    }
+
+    private User findUser(DeleteAllTaskByUserRequest deleteTaskByUserRequest) {
+        User foundUser = findUserById(deleteTaskByUserRequest.getUserId());
+        if (foundUser.getAllTasks() == null) throw new IllegalStateException("No task found for user");
+        return foundUser;
+    }
 
     private static List<Task> validateTasks(User foundUser) {
         List<Task> tasks = foundUser.getAllTasks();
@@ -264,14 +288,37 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public CompleteTaskResponse completeTask(CompleteTaskRequest completeTaskRequest) {
+        User user = findUserById(completeTaskRequest.getUserId());
+        completeTask(completeTaskRequest, user);
+        return mapCompleteTaskResponse();
+    }
+
+    private void completeTask(CompleteTaskRequest completeTaskRequest, User user) {
+        Task completedTask = user.getAllTasks().stream().filter(task -> task.getTitle().equals(completeTaskRequest.getTitle().toLowerCase().trim())).findFirst().orElseThrow(() -> new ToDoRunTimeException("Task not found"));
+        List<Task> allUserTasks = user.getAllTasks();
+        allUserTasks.remove(completedTask);
+        user.setAllTasks(allUserTasks);
+        addPendingTask(user, completedTask);
+    }
+
+    private void addPendingTask(User user, Task completedTask) {
+        List<Task> allUserTasks;
+        allUserTasks = user.getPendingTasks();
+        allUserTasks.remove(completedTask);
+        user.setPendingTasks(allUserTasks);
+        userRepository.save(user);
+    }
+
+    @Override
     public List<Task> findUserTasksByPriority(viewAllTasByPriorityRequest getTaskByPriorityRequest) {
         User existinguser = findUserById(getTaskByPriorityRequest.getUserId());
         validateIfUserIsNull(existinguser);
         ifUserLoggedIn(existinguser);
-        return getAllTasks(getTaskByPriorityRequest);
+        return getAllUserTasks(getTaskByPriorityRequest);
     }
 
-    private List<Task> getAllTasks(viewAllTasByPriorityRequest getTaskByPriorityRequest) {
+    private List<Task> getAllUserTasks(viewAllTasByPriorityRequest getTaskByPriorityRequest) {
         List<Task> allTasksByUser = taskService.findAllTaskByUser(getTaskByPriorityRequest.getUserId());
         List<Task> foundTasks = new ArrayList<>();
         for(Task task:allTasksByUser){if(task.getTaskPriority().equals(getTaskByPriorityRequest.getTaskPriority())){foundTasks.add(task);}}
@@ -279,13 +326,21 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<Task> getAllPendingTasksByUser(GetUserPendingTasksRequest getAllPendingTasksRequests) {
-        return null;
+    public List<Task> viewAllPendingTasksByUser(GetUserPendingTasksRequest getAllPendingTasksRequests) {
+        User existingUser = findUserById(getAllPendingTasksRequests.getUserId());
+        validateIfUserIsNull(existingUser);
+        return  getAllPendingTasks(existingUser);
+    }
+
+    private List<Task> getAllPendingTasks(User existingUser) {
+       List<Task> allTasks = existingUser.getPendingTasks();
+       if(allTasks.isEmpty())throw new ToDoRunTimeException("No pending task found");
+       return allTasks;
     }
 
     @Override
     public UpdateUserResponse updateUserProfile(UpdateUserRequest updateUserRequest) {
-        //if(updateUserRequest.getUserId() == null) throw new ToDoRunTimeException("Could not read your request;");
+        if(updateUserRequest.getUserId() == null) throw new ToDoRunTimeException("Could not read your request;");
         User foundUser = findUserById(updateUserRequest.getUserId());
         ifUserLoggedIn(foundUser);
         update(updateUserRequest, foundUser);
@@ -303,7 +358,6 @@ public class UserServiceImpl implements UserService{
         foundUser.setPassword(updateUserRequest.getPassword());
         foundUser.setEmail(updateUserRequest.getEmail());
     }
-
     private static void ifUserLoggedIn(User foundUser) {
         if(!foundUser.isLoggedIn())throw new ToDoRunTimeException("User not logged in");
     }
@@ -314,8 +368,6 @@ public class UserServiceImpl implements UserService{
      if(founduser == null)throw new ToDoRunTimeException("User not found");
      return founduser;
     }
-
-
     @Override
     public List<User> getAllUsers(){
         List<User> allUsers = userRepository.findAll();
@@ -348,13 +400,10 @@ public class UserServiceImpl implements UserService{
         List<Task> userTasks = taskService.findAllTaskByUser(getTaskRequest.getUserId());
         return userTasks.stream().filter(task -> task.getTitle().equals(getTaskRequest.getTitle().toLowerCase().trim())).findFirst().orElseThrow(()-> new ToDoRunTimeException("No task found"));
     }
-
     @Override
     public UpDateTaskResponse updateTask(UpDateTaskRequest upDateTaskRequest){
         final User founduser = findAndValidateUser(upDateTaskRequest);
-        Task updatedTask = taskService.updateUserTask(upDateTaskRequest,founduser);
-        Task existingTaskToBeUpdated = founduser.getAllTasks().stream().filter(task -> task.getTitle().equals(upDateTaskRequest.getTaskToBeUpdatedTitle().toLowerCase().trim())).findFirst().orElseThrow(() -> new ToDoRunTimeException("Task not found"));
-        updateTask(existingTaskToBeUpdated, founduser, updatedTask);
+        taskService.updateUserTask(upDateTaskRequest,founduser);
         return mapUDateTaskResponse();
     }
 

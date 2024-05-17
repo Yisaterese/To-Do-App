@@ -1,7 +1,10 @@
 package com.example.todo_app.data.dto.utility;
 
 import com.example.todo_app.data.dto.request.RegisterUserRequest;
+import com.example.todo_app.data.dto.utility.exception.ToDoRunTimeException;
+import com.example.todo_app.data.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
@@ -17,28 +20,39 @@ public class MessageSender {
     static String senderMailAddress = "teresejosephyisa@gmail.com";
 
   public  void registrationMessage(RegisterUserRequest userRequest){
-      simpleMailMessage.setFrom(senderMailAddress);
-      simpleMailMessage.setTo(userRequest.getEmail());
-      simpleMailMessage.setSubject(Message.registrationMessageSubject());
-      simpleMailMessage.setText(Message.registrationMessageBody(userRequest.getUserName()));
-      javaMailSender.send(simpleMailMessage);
+      try {
+          simpleMailMessage.setFrom(senderMailAddress);
+          simpleMailMessage.setTo(userRequest.getEmail());
+          simpleMailMessage.setSubject(Message.registrationMessageSubject());
+          simpleMailMessage.setText(Message.registrationMessageBody(userRequest.getUserName()));
+          javaMailSender.send(simpleMailMessage);
+      }catch (MailSendException exception){
+          throw new ToDoRunTimeException("Invalid email address");
+      }
 
   }
-    public  void shareTaskMessage(String userName, String title, String email){
-        simpleMailMessage.setFrom(senderMailAddress);
-        simpleMailMessage.setTo(email);
-        simpleMailMessage.setSubject(Message.shareTaskSubjectMessage());
-        simpleMailMessage.setText(Message.shareTaskMessage(title,userName));
-        javaMailSender.send(simpleMailMessage);
-
+    public  void shareTaskMessage(User user, String title){
+      try {
+          simpleMailMessage.setFrom(senderMailAddress);
+          simpleMailMessage.setTo(user.getEmail());
+          simpleMailMessage.setSubject(Message.shareTaskSubjectMessage());
+          simpleMailMessage.setText(Message.shareTaskMessage(title, user.getUserName()));
+          javaMailSender.send(simpleMailMessage);
+      }catch (MailSendException e){
+          throw new ToDoRunTimeException("Invalid email address");
+      }
     }
 
-    public  void assignTaskMessage(String userName, String title, String email){
-        simpleMailMessage.setFrom(senderMailAddress);
-        simpleMailMessage.setTo(email);
-        simpleMailMessage.setSubject(Message.assigneTaskSubject());
-        simpleMailMessage.setText(Message.assignTaskMessage(userName, title));
-        javaMailSender.send(simpleMailMessage);
+    public  void assignTaskMessage(User user, String title){
+      try {
+          simpleMailMessage.setFrom(senderMailAddress);
+          simpleMailMessage.setTo(user.getEmail());
+          simpleMailMessage.setSubject(Message.assigneTaskSubject());
+          simpleMailMessage.setText(Message.assignTaskMessage(user.getUserName(), title));
+          javaMailSender.send(simpleMailMessage);
+      }catch (MailSendException exception){
+          throw new ToDoRunTimeException("Invalid email address");
+      }
 
     }
 

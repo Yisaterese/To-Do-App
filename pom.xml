@@ -35,7 +35,6 @@
 			<version>0.4</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-core -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-core</artifactId>
@@ -75,8 +74,6 @@
 			<version>3.2.4</version>
 			<type>pom</type>
 		</dependency>
-
-
 
 		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 		<dependency>

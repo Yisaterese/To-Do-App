@@ -40,6 +40,7 @@ public class Mapper {
        return updateUserResponse;
     }
 
+
     public static UpDateTaskResponse mapUDateTaskResponse(){
         UpDateTaskResponse upDateTaskResponse = new UpDateTaskResponse();
         upDateTaskResponse.setMessage("Task updated successfully");
@@ -50,6 +51,12 @@ public class Mapper {
         DeleteTaskResponse deleteTaskResponse = new DeleteTaskResponse();
         deleteTaskResponse.setMessage("Task deleted successfully");
         return deleteTaskResponse;
+    }
+
+    public static CompleteTaskResponse mapCompleteTaskResponse(){
+        CompleteTaskResponse completeTaskResponse = new CompleteTaskResponse();
+        completeTaskResponse.setMessage("Task completed successfully");
+        return completeTaskResponse;
     }
 
     public static LoginResponse mapLoginResponse(User existingUser){

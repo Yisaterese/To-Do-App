@@ -1,5 +1,6 @@
 package com.example.todo_app.data.model;
 
+import com.example.todo_app.data.dto.utility.TaskStatus;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.Data;
@@ -10,8 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 
-@Setter
-@Getter
+@Data
 @Document
 public class Task {
     @Id
@@ -21,7 +21,6 @@ public class Task {
     private String taskPriority;
     private String userId;
     private LocalDate dueDate;
-
     private LocalDate dateCreated;
 
 

@@ -51,8 +51,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task findTaskById(String userId) {
         Task foundTask = taskRepository.findTaskByUserId(userId);
-        if(foundTask == null)throw new ToDoRunTimeException("Task not found");
-        return foundTask;
+        return validateIfTaskIsNull(foundTask);
     }
     @Override
     public void deleteAllUserTask(List<Task> tasks) {
@@ -79,7 +78,6 @@ public class TaskServiceImpl implements TaskService {
 
     private static LocalDate formatDate(String createTaskRequest){
         if(createTaskRequest == null)throw  new ToDoRunTimeException("Invalid date provided");
-        DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return LocalDate.parse(createTaskRequest);
     }
 
@@ -98,22 +96,43 @@ public class TaskServiceImpl implements TaskService {
 
 @Override
 public Task updateUserTask(UpDateTaskRequest upDateTaskRequest, User existingUser) {
-    final Task taskTobe_updated = getTaskTo_toBeUpdated(upDateTaskRequest, existingUser);
-    updateTaskProperties(upDateTaskRequest, taskTobe_updated);
-    taskRepository.save(taskTobe_updated);
-    return taskTobe_updated;
+    Task taskTobe_updated = getTask(existingUser.getAllTasks(), upDateTaskRequest.getTaskToBeUpdatedTitle());
+    setUpdateTask_properties(upDateTaskRequest, taskTobe_updated);
+    return taskRepository.save(taskTobe_updated);
 
 }
 
+    private static void setUpdateTask_properties(UpDateTaskRequest upDateTaskRequest, Task taskTobe_updated) {
+        taskTobe_updated.setTaskPriority(upDateTaskRequest.getTaskPriority());
+        taskTobe_updated.setDescription(upDateTaskRequest.getDescription());
+        taskTobe_updated.setDueDate(formatDate(upDateTaskRequest.getDueDate()));
+        taskTobe_updated.setTitle(upDateTaskRequest.getTitle().toLowerCase().trim());
+    }
+
+    private Task getTask(List<Task> allTasks, String title) {
+        return allTasks.stream().filter(task -> task.getTitle().equals(title)).findFirst().orElseThrow(() -> new IllegalArgumentException("Task not found"));
+    }
+
+    private void updateTaskPropertiesInRepository(UpDateTaskRequest upDateTaskRequest, User existingUser) {
+        Task UserTaskToBe_updated = taskRepository.findTaskByUserId(existingUser.getId());
+        validateIfTaskIsNull(UserTaskToBe_updated);
+        updateTaskProperties(upDateTaskRequest, UserTaskToBe_updated);
+        taskRepository.save( UserTaskToBe_updated);
+    }
+
     private static void updateTaskProperties(UpDateTaskRequest upDateTaskRequest, Task taskTobe_updated) {
         taskTobe_updated.setTaskPriority(upDateTaskRequest.getTaskPriority());
-        taskTobe_updated.setTitle(upDateTaskRequest.getTitle());
-        taskTobe_updated.setDueDate(formatDate(upDateTaskRequest.getDueDate()));
+        taskTobe_updated.setTitle(upDateTaskRequest.getTaskToBeUpdatedTitle());
+        //taskTobe_updated.setDueDate(formatDate(upDateTaskRequest.getDueDate()));
         taskTobe_updated.setDescription(upDateTaskRequest.getDescription());
     }
 
     private static Task getTaskTo_toBeUpdated(UpDateTaskRequest upDateTaskRequest, User existingUser) {
         Task taskTobe_updated = existingUser.getAllTasks().stream().filter(task -> task.getTitle().equals(upDateTaskRequest.getTaskToBeUpdatedTitle().toLowerCase().trim())).findFirst().orElseThrow(() -> new ToDoRunTimeException("Task not found"));
+        return validateIfTaskIsNull(taskTobe_updated);
+    }
+
+    private static Task validateIfTaskIsNull(Task taskTobe_updated) {
         if(taskTobe_updated == null)throw new ToDoRunTimeException("Task not found");
         return taskTobe_updated;
     }
@@ -122,7 +141,6 @@ public Task updateUserTask(UpDateTaskRequest upDateTaskRequest, User existingUse
     public DeleteAllTaskResponse deleteAllTasks(User user) {
         List<Task> tasks = taskRepository.findByUserId(user.getId());
         if(tasks.isEmpty())throw new ToDoRunTimeException("No task found");
-        user.getAllTasks().clear();
         taskRepository.deleteAll(tasks);
         return mapDeleteTasksResponse();
     }

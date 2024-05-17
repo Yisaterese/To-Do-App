@@ -9,9 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-
 @RestController
 @RequestMapping("/api")
 public class TaskController {
@@ -71,7 +69,7 @@ public class TaskController {
             return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()),HttpStatus.BAD_REQUEST);
         }
     }
-@PostMapping("/updateTask")
+    @PostMapping("/updateTask")
     public ResponseEntity<ApiResponse> updateTask(@RequestBody UpDateTaskRequest upDateTaskRequest){
         try{
             UpDateTaskResponse response = userService.updateTask(upDateTaskRequest);
@@ -89,15 +87,24 @@ public class TaskController {
             return new ResponseEntity<>(new ApiResponse(false,exception.getMessage()),HttpStatus.BAD_REQUEST);
         }
     }
+    @PostMapping("/viewAll_pendingTask")
+    public ResponseEntity<ApiResponse> viewPendingTask(@RequestBody  GetUserPendingTasksRequest getAllPendingTasksRequests ) {
+        try {
+            List<Task> task = userService.viewAllPendingTasksByUser(getAllPendingTasksRequests);
+            return new ResponseEntity<>(new ApiResponse(true, task), HttpStatus.OK);
+        } catch (ToDoRunTimeException exception) {
+            return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()), HttpStatus.BAD_REQUEST);
+        }
 
-
-
-
-
-
-
-
-
-
+    }
+    @PostMapping("/complete_task")
+    public ResponseEntity<ApiResponse> completeTask (@RequestBody CompleteTaskRequest completedTaskRequest){
+            try {
+                CompleteTaskResponse response = userService.completeTask(completedTaskRequest);
+                return new ResponseEntity<>(new ApiResponse(true, response), HttpStatus.OK);
+            } catch (ToDoRunTimeException exception) {
+                return new ResponseEntity<>(new ApiResponse(false, exception.getMessage()), HttpStatus.BAD_REQUEST);
+            }
+        }
 }
 

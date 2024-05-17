@@ -43,10 +43,10 @@ public interface UserService {
 
     List<Task> getAllTaskSByUser(viewAllTasksByUserRequest viewAllTasksByUserrequest);
 
-
+    CompleteTaskResponse completeTask(CompleteTaskRequest completeTaskRequest);
     List<Task> findUserTasksByPriority(viewAllTasByPriorityRequest getTaskByPriorityRequest);
 
-    List<Task> getAllPendingTasksByUser(GetUserPendingTasksRequest getAllPendingTasksRequests);
+    List<Task> viewAllPendingTasksByUser(GetUserPendingTasksRequest getAllPendingTasksRequests);
 
 
     Task findTaskByTitle(GetTaskRequest getTaskRequest);
